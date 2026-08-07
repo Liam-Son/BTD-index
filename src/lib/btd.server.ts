@@ -129,7 +129,12 @@ async function fetchCrypto(): Promise<{ rows: RankedAsset[]; issues: string[] }>
       { headers: UA },
     );
     if (!res.ok) throw new Error("coingecko");
-    const list = (await res.json()) as any[];
+    const raw = (await res.json()) as any[];
+    // Stablecoins carry no dip signal — exclude them from the universe.
+    const list = raw.filter(
+      (c) => Math.abs(Number(c.price_change_percentage_30d_in_currency ?? 0)) > 1.5,
+    );
+
     return {
       rows: list.map((c) => ({
         symbol: String(c.symbol).toUpperCase(),
