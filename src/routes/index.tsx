@@ -139,21 +139,29 @@ function Terminal() {
               Is this a statistically attractive time to buy the dip?
             </h2>
             <p className="mt-3 max-w-xl text-sm leading-relaxed text-muted-foreground">
-              The BTD Score aggregates six independent engines — fear, drawdown, momentum, mean
-              reversion, trend quality and risk — each normalized to 0–100, into a single
-              0–100 verdict on every asset in the global universe.
+              BTD Index™ v1.0 scores every asset as{" "}
+              <span className="tabular text-foreground">
+                0.40V + 0.25M + 0.20F + 0.10Q + 0.05R
+              </span>{" "}
+              — peer-relative valuation (P/E, P/B percentiles), oversold momentum (RSI 14),
+              market fear (Fear &amp; Greed, VIX), balance-sheet quality (ROE, debt-to-equity) and
+              risk (beta) — each normalized to 0–100.
             </p>
             <div className="mt-5 flex flex-wrap gap-2">
-              {["Fear", "Drawdown", "Momentum", "Mean Reversion", "Trend Quality", "Risk"].map(
-                (f) => (
-                  <span
-                    key={f}
-                    className="rounded-sm border border-border bg-surface-2 px-2 py-1 text-[11px] text-muted-foreground"
-                  >
-                    {f}
-                  </span>
-                ),
-              )}
+              {[
+                ["Valuation", "40%"],
+                ["Momentum", "25%"],
+                ["Fear", "20%"],
+                ["Quality", "10%"],
+                ["Risk", "5%"],
+              ].map(([f, w]) => (
+                <span
+                  key={f}
+                  className="rounded-sm border border-border bg-surface-2 px-2 py-1 text-[11px] text-muted-foreground"
+                >
+                  {f} <span className="tabular text-primary">{w}</span>
+                </span>
+              ))}
             </div>
           </div>
 
