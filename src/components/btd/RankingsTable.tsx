@@ -167,25 +167,48 @@ export function RankingsTable({
                       </div>
                     </div>
                     {isOpen && (
-                      <div className="mt-3 grid grid-cols-2 gap-2 rounded-sm bg-background p-3 md:grid-cols-3 lg:grid-cols-6">
-                        {a.factors.map((f) => (
-                          <div key={f.key}>
-                            <div className="flex items-baseline justify-between gap-2">
-                              <span className="text-[10px] uppercase tracking-wide text-muted-foreground">
-                                {f.label}
-                              </span>
-                              <span className="tabular text-xs font-bold">
-                                {f.value.toFixed(0)}
-                              </span>
+                      <div className="mt-3 space-y-3 rounded-sm bg-background p-3">
+                        <div className="grid grid-cols-2 gap-3 md:grid-cols-3 lg:grid-cols-5">
+                          {a.factors.map((f) => (
+                            <div key={f.key}>
+                              <div className="flex items-baseline justify-between gap-2">
+                                <span className="text-[10px] uppercase tracking-wide text-muted-foreground">
+                                  {f.label}{" "}
+                                  <span className="text-muted-foreground/60">
+                                    {Math.round(f.weight * 100)}%
+                                  </span>
+                                </span>
+                                <span className="tabular text-xs font-bold">
+                                  {f.points.toFixed(1)}
+                                  <span className="font-normal text-muted-foreground">
+                                    /{f.max}
+                                  </span>
+                                </span>
+                              </div>
+                              <div className="mt-1 h-1 overflow-hidden rounded-full bg-secondary">
+                                <div
+                                  className="score-bar h-full"
+                                  style={{ width: `${f.value}%` }}
+                                />
+                              </div>
+                              <p className="tabular mt-1 text-[10px] text-muted-foreground">
+                                {f.value.toFixed(0)}/100 · {f.detail}
+                                {f.proxy ? " (proxy)" : ""}
+                              </p>
                             </div>
-                            <div className="mt-1 h-1 overflow-hidden rounded-full bg-secondary">
-                              <div className="score-bar h-full" style={{ width: `${f.value}%` }} />
-                            </div>
-                            <p className="tabular mt-1 text-[10px] text-muted-foreground">
-                              {f.detail}
-                            </p>
-                          </div>
-                        ))}
+                          ))}
+                        </div>
+                        <div className="flex flex-wrap items-center gap-x-4 gap-y-1 border-t border-border pt-2 text-[11px]">
+                          <span className="tabular font-semibold">
+                            Total {a.btdScore.toFixed(1)} / 100
+                          </span>
+                          <span className="tabular text-muted-foreground">
+                            Confidence {a.confidence}%
+                          </span>
+                          <span className="text-muted-foreground">
+                            {a.reasons.join(" · ")}
+                          </span>
+                        </div>
                       </div>
                     )}
                   </td>
