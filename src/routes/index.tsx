@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import { getRankings } from "@/lib/btd.functions";
@@ -118,6 +118,12 @@ function Terminal() {
             </h1>
           </div>
           <div className="flex items-center gap-4 text-[11px] text-muted-foreground">
+            <Link
+              to="/stocks"
+              className="rounded-sm border border-border px-2 py-1 hover:text-foreground"
+            >
+              Stocks to buy on the dip
+            </Link>
             <span className="flex items-center gap-1.5">
               <span
                 className={`h-1.5 w-1.5 rounded-full ${isFetching ? "live-dot bg-warn" : "bg-up"}`}
