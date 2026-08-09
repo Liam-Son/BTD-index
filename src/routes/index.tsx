@@ -103,13 +103,15 @@ function Terminal() {
       <header className="sticky top-0 z-20 border-b border-border bg-background/95 backdrop-blur">
         <div className="mx-auto flex max-w-[1600px] items-center justify-between gap-4 px-4 py-3">
           <div className="flex items-baseline gap-3">
-            <h1 className="text-lg font-bold tracking-tight">
-              BTD<span className="text-primary">.</span>Index
-              <span className="align-super text-[9px] text-muted-foreground">™</span>
+            <h1 className="flex items-baseline gap-3 text-lg font-bold tracking-tight">
+              <span>
+                BTD<span className="text-primary">.</span>Index
+                <span className="align-super text-[9px] text-muted-foreground">™</span>
+              </span>
+              <span className="hidden text-[11px] font-medium uppercase tracking-widest text-muted-foreground sm:inline">
+                Quantitative Buy-the-Dip Terminal
+              </span>
             </h1>
-            <p className="hidden text-[11px] uppercase tracking-widest text-muted-foreground sm:block">
-              Buy-the-Dip Quantitative Terminal
-            </p>
           </div>
           <div className="flex items-center gap-4 text-[11px] text-muted-foreground">
             <span className="flex items-center gap-1.5">
