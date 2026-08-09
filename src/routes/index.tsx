@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import { getRankings } from "@/lib/btd.functions";
@@ -22,7 +22,11 @@ export const Route = createFileRoute("/")({
         content:
           "Top 30 global buying opportunities scored 0-100 on fear, drawdown, momentum, mean reversion, trend quality and risk.",
       },
+      { property: "og:type", content: "website" },
+      { property: "og:url", content: "https://dip-finder-score.lovable.app/" },
+      { name: "twitter:card", content: "summary_large_image" },
     ],
+    links: [{ rel: "canonical", href: "https://dip-finder-score.lovable.app/" }],
   }),
   component: Terminal,
 });
@@ -114,6 +118,12 @@ function Terminal() {
             </h1>
           </div>
           <div className="flex items-center gap-4 text-[11px] text-muted-foreground">
+            <Link
+              to="/stocks"
+              className="rounded-sm border border-border px-2 py-1 hover:text-foreground"
+            >
+              Stocks to buy on the dip
+            </Link>
             <span className="flex items-center gap-1.5">
               <span
                 className={`h-1.5 w-1.5 rounded-full ${isFetching ? "live-dot bg-warn" : "bg-up"}`}
