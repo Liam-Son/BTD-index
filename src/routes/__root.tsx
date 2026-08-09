@@ -77,15 +77,37 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "BTD Index™ — Quantitative Buy-the-Dip Terminal" },
-      {
-        name: "description",
-        content:
-          "BTD Index™ scores global assets 0-100 on how statistically attractive it is to buy the dip, using fear, drawdown, momentum and risk engines.",
-      },
       { name: "author", content: "BTD Index" },
       { property: "og:type", content: "website" },
+      { property: "og:site_name", content: "BTD Index™" },
       { name: "twitter:card", content: "summary_large_image" },
+    ],
+    scripts: [
+      {
+        type: "application/ld+json",
+        children: JSON.stringify({
+          "@context": "https://schema.org",
+          "@graph": [
+            {
+              "@type": "Organization",
+              "@id": "https://dip-finder-score.lovable.app/#organization",
+              name: "BTD Index™",
+              url: "https://dip-finder-score.lovable.app",
+              description:
+                "Quantitative research terminal publishing the BTD Score, a 0-100 buy-the-dip attractiveness rating for global stocks, crypto, ETFs and commodities.",
+            },
+            {
+              "@type": "WebSite",
+              "@id": "https://dip-finder-score.lovable.app/#website",
+              name: "BTD Index™ — Quantitative Buy-the-Dip Terminal",
+              url: "https://dip-finder-score.lovable.app",
+              publisher: { "@id": "https://dip-finder-score.lovable.app/#organization" },
+              description:
+                "Live buy-the-dip rankings scoring 60+ global assets 0-100 on valuation, momentum, market fear, quality and risk.",
+            },
+          ],
+        }),
+      },
     ],
     links: [
       {
