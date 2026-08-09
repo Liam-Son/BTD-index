@@ -22,7 +22,11 @@ export const Route = createFileRoute("/")({
         content:
           "Top 30 global buying opportunities scored 0-100 on fear, drawdown, momentum, mean reversion, trend quality and risk.",
       },
+      { property: "og:type", content: "website" },
+      { property: "og:url", content: "https://dip-finder-score.lovable.app/" },
+      { name: "twitter:card", content: "summary_large_image" },
     ],
+    links: [{ rel: "canonical", href: "https://dip-finder-score.lovable.app/" }],
   }),
   component: Terminal,
 });
