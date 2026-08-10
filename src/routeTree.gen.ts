@@ -10,12 +10,18 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as IndexDothtmlRouteImport } from './routes/index[.]html'
 import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as StocksRouteImport } from './routes/stocks'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const IndexDothtmlRoute = IndexDothtmlRouteImport.update({
+  id: '/index.html',
+  path: '/index.html',
   getParentRoute: () => rootRouteImport,
 } as any)
 const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
@@ -31,30 +37,34 @@ const StocksRoute = StocksRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/index.html': typeof IndexDothtmlRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/stocks': typeof StocksRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/index.html': typeof IndexDothtmlRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/stocks': typeof StocksRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/index.html': typeof IndexDothtmlRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/stocks': typeof StocksRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/sitemap.xml' | '/stocks'
+  fullPaths: '/' | '/index.html' | '/sitemap.xml' | '/stocks'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/sitemap.xml' | '/stocks'
-  id: '__root__' | '/' | '/sitemap.xml' | '/stocks'
+  to: '/' | '/index.html' | '/sitemap.xml' | '/stocks'
+  id: '__root__' | '/' | '/index.html' | '/sitemap.xml' | '/stocks'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  IndexDothtmlRoute: typeof IndexDothtmlRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   StocksRoute: typeof StocksRoute
 }
@@ -66,6 +76,13 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/index.html': {
+      id: '/index.html'
+      path: '/index.html'
+      fullPath: '/index.html'
+      preLoaderRoute: typeof IndexDothtmlRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/sitemap.xml': {
@@ -87,19 +104,10 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  IndexDothtmlRoute: IndexDothtmlRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
   StocksRoute: StocksRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}

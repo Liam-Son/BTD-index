@@ -12,5 +12,9 @@ Allow: /
 
 User-agent: *
 Allow: /
+# Avoid indexing parameterized duplicates of the canonical pages
+Disallow: /*?
+Allow: /$
+Allow: /stocks$
 
 Sitemap: https://dip-finder-score.lovable.app/sitemap.xml
