@@ -44,12 +44,33 @@ function isH3SwallowedErrorBody(body: string): boolean {
   }
 }
 
+// Canonical URL normalization: collapse duplicate indexable URLs to a single
+// canonical path with a permanent redirect and no query string carried over.
+export function canonicalRedirect(request: Request): Response | null {
+  const url = new URL(request.url);
+  const isDocument = request.method === "GET" || request.method === "HEAD";
+  if (!isDocument) return null;
+  if (url.pathname.startsWith("/api/") || url.pathname.startsWith("/_serverFn")) return null;
+
+  let pathname = url.pathname;
+  if (pathname === "/index.html") pathname = "/";
+  if (pathname.length > 1 && pathname.endsWith("/")) pathname = pathname.replace(/\/+$/, "") || "/";
+
+  if (pathname === url.pathname && !url.search) return null;
+  if (pathname === url.pathname) return null;
+
+  return new Response(null, { status: 301, headers: { Location: pathname } });
+}
+
 export default {
   async fetch(request: Request, env: unknown, ctx: unknown) {
     try {
+      const redirect = canonicalRedirect(request);
+      if (redirect) return redirect;
       const handler = await getServerEntry();
       const response = await handler.fetch(request, env, ctx);
       return await normalizeCatastrophicSsrResponse(response);
+
     } catch (error) {
       console.error(error);
       return new Response(renderErrorPage(), {
