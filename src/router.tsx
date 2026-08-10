@@ -10,6 +10,8 @@ export const getRouter = () => {
     context: { queryClient },
     scrollRestoration: true,
     defaultPreloadStaleTime: 0,
+    // Canonical URL shape: no trailing slash (avoids /stocks/ vs /stocks duplicates)
+    trailingSlash: "never",
   });
 
   return router;
