@@ -115,3 +115,50 @@ export function validateStructuredData(html: string, path: string): string[] {
 
   return problems;
 }
+
+// ---------------------------------------------------------------------------
+// Canonical schema payloads used by the routes (single source of truth so the
+// tests validate exactly what ships).
+// ---------------------------------------------------------------------------
+
+const SITE = "https://dip-finder-score.lovable.app";
+
+export const siteJsonLd = {
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "Organization",
+      "@id": `${SITE}/#organization`,
+      name: "BTD Index™",
+      url: SITE,
+      description:
+        "Quantitative research terminal publishing the BTD Score, a 0-100 buy-the-dip attractiveness rating for global stocks, crypto, ETFs and commodities.",
+    },
+    {
+      "@type": "WebSite",
+      "@id": `${SITE}/#website`,
+      name: "BTD Index™ — Quantitative Buy-the-Dip Terminal",
+      url: SITE,
+      publisher: { "@id": `${SITE}/#organization` },
+      description:
+        "Live buy-the-dip rankings scoring 60+ global assets 0-100 on valuation, momentum, market fear, quality and risk.",
+    },
+  ],
+} as const;
+
+export interface FaqItem {
+  q: string;
+  a: string;
+}
+
+export function buildFaqJsonLd(items: readonly FaqItem[]) {
+  return {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    mainEntity: items.map((f) => ({
+      "@type": "Question",
+      name: f.q,
+      acceptedAnswer: { "@type": "Answer", text: f.a },
+    })),
+  };
+}

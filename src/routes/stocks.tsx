@@ -4,13 +4,14 @@ import { getRankings } from "@/lib/btd.functions";
 import { fmtPct, ratingFor } from "@/lib/btd-core";
 import { RankingsTable } from "@/components/btd/RankingsTable";
 import { RatingBadge } from "@/components/btd/RatingBadge";
+import { buildFaqJsonLd, type FaqItem } from "@/lib/structured-data";
 
 const TITLE = "Stocks to Buy on the Dip — Live BTD Index™ Equity Rankings";
 const DESCRIPTION =
   "Quantitative rankings of global stocks to buy on the dip, scored 0–100 on valuation, oversold momentum, market fear, quality and risk. Repriced every 5 minutes.";
 const URL = "https://dip-finder-score.lovable.app/stocks";
 
-const FAQ = [
+export const FAQ: FaqItem[] = [
   {
     q: "What does it mean to buy the dip in stocks?",
     a: "Buying the dip means adding to a stock after its price falls below recent levels, on the thesis that the decline is driven by sentiment rather than a permanent change in fundamentals. BTD Index™ tests that thesis quantitatively instead of relying on intuition.",
@@ -42,18 +43,7 @@ export const Route = createFileRoute("/stocks")({
     ],
     links: [{ rel: "canonical", href: URL }],
     scripts: [
-      {
-        type: "application/ld+json",
-        children: JSON.stringify({
-          "@context": "https://schema.org",
-          "@type": "FAQPage",
-          mainEntity: FAQ.map((f) => ({
-            "@type": "Question",
-            name: f.q,
-            acceptedAnswer: { "@type": "Answer", text: f.a },
-          })),
-        }),
-      },
+      { type: "application/ld+json", children: JSON.stringify(buildFaqJsonLd(FAQ)) },
     ],
   }),
   component: StocksPage,

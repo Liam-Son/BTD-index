@@ -2,8 +2,11 @@ import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { describe, expect, it } from "vitest";
 import { BASE_URL } from "../sitemap";
+import { FAQ } from "../../routes/stocks";
 import {
   REQUIRED_SCHEMA_TYPES,
+  buildFaqJsonLd,
+  siteJsonLd,
   extractJsonLd,
   nodesOfType,
   typesOf,
@@ -15,29 +18,6 @@ const rootRoute = read("src/routes/__root.tsx");
 const stocksRoute = read("src/routes/stocks.tsx");
 
 const wrap = (json: string) => `<script type="application/ld+json">${json}</script>`;
-
-/** Pull the JSON.stringify(...) payloads out of a route's head() scripts. */
-function jsonLdFromSource(source: string): string[] {
-  const out: string[] = [];
-  const marker = "JSON.stringify(";
-  let idx = source.indexOf(marker);
-  while (idx !== -1) {
-    const start = source.indexOf("{", idx);
-    let depth = 0;
-    for (let i = start; i < source.length; i++) {
-      if (source[i] === "{") depth++;
-      else if (source[i] === "}") {
-        depth--;
-        if (depth === 0) {
-          out.push(source.slice(start, i + 1));
-          break;
-        }
-      }
-    }
-    idx = source.indexOf(marker, idx + marker.length);
-  }
-  return out;
-}
 
 describe("structured data helpers", () => {
   it("extracts and flattens @graph nodes", () => {
@@ -82,7 +62,12 @@ describe("structured data helpers", () => {
 });
 
 describe("structured data (source)", () => {
-  const rootBlocks = jsonLdFromSource(rootRoute).map((j) => wrap(j)).join("\n");
+  const rootBlocks = wrap(JSON.stringify(siteJsonLd));
+
+  it("keeps the root head wired to the shared site schema", () => {
+    expect(rootRoute).toContain("siteJsonLd");
+    expect(stocksRoute).toContain("buildFaqJsonLd(FAQ)");
+  });
 
   it("declares Organization and WebSite in the root head", () => {
     const nodes = extractJsonLd(rootBlocks);
@@ -99,16 +84,13 @@ describe("structured data (source)", () => {
   });
 
   it("declares a valid FAQPage on /stocks", () => {
-    const html = [rootBlocks, ...jsonLdFromSource(stocksRoute).map(wrap)].join("\n");
+    const html = [rootBlocks, wrap(JSON.stringify(buildFaqJsonLd(FAQ)))].join("\n");
     expect(validateStructuredData(html, "/stocks")).toEqual([]);
   });
 
   it("keeps FAQ answers substantive", () => {
-    const nodes = extractJsonLd(jsonLdFromSource(stocksRoute).map(wrap).join("\n"));
-    const faq = nodesOfType(nodes, "FAQPage")[0]!;
-    const questions = faq["mainEntity"] as Array<{ acceptedAnswer: { text: string } }>;
-    expect(questions.length).toBeGreaterThanOrEqual(3);
-    for (const q of questions) expect(q.acceptedAnswer.text.length).toBeGreaterThan(80);
+    expect(FAQ.length).toBeGreaterThanOrEqual(3);
+    for (const f of FAQ) expect(f.a.length).toBeGreaterThan(80);
   });
 });
 
