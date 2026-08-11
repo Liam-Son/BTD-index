@@ -12,6 +12,8 @@ const BASE_URL = (
   "https://dip-finder-score.lovable.app"
 ).replace(/\/+$/, "");
 
+import { REQUIRED_SCHEMA_TYPES, validateStructuredData } from "../src/lib/structured-data.ts";
+
 const GOOGLE_SITE_VERIFICATION = "NtTwNfTt1oLEPfKEH2vqTZ_YMNqkWYVH-sEmAy5yvJM";
 const CANONICAL_PATHS = ["/", "/stocks"];
 
@@ -72,10 +74,24 @@ async function checkVerification() {
   else fail("Search Console verification meta tag is missing from the site root HTML");
 }
 
+async function checkStructuredData() {
+  for (const path of Object.keys(REQUIRED_SCHEMA_TYPES)) {
+    const { res, body } = await get(path);
+    if (!res.ok) {
+      fail(`${path} unreachable (HTTP ${res.status})`);
+      continue;
+    }
+    const problems = validateStructuredData(body, path);
+    if (problems.length) problems.forEach(fail);
+    else ok(`${path} serves valid ${REQUIRED_SCHEMA_TYPES[path].join(" + ")} structured data`);
+  }
+}
+
 console.log(`Checking ${BASE_URL}\n`);
 await checkSitemap();
 await checkRobots();
 await checkVerification();
+await checkStructuredData();
 
 if (failures.length) {
   console.error(`\n${failures.length} check(s) failed.`);
