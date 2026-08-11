@@ -11,6 +11,7 @@ import { useEffect, type ReactNode } from "react";
 
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
+import { GOOGLE_SITE_VERIFICATION } from "../lib/seo-verification";
 
 function NotFoundComponent() {
   return (
@@ -80,7 +81,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { name: "author", content: "BTD Index" },
       {
         name: "google-site-verification",
-        content: "NtTwNfTt1oLEPfKEH2vqTZ_YMNqkWYVH-sEmAy5yvJM",
+        content: GOOGLE_SITE_VERIFICATION,
       },
       { property: "og:type", content: "website" },
       { property: "og:site_name", content: "BTD Index™" },
