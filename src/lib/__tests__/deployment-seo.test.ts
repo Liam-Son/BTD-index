@@ -9,7 +9,8 @@ const rootRoute = readFileSync(resolve(process.cwd(), "src/routes/__root.tsx"), 
 describe("Search Console verification (source)", () => {
   it("keeps the verification token in the root head", () => {
     expect(rootRoute).toContain("google-site-verification");
-    expect(rootRoute).toContain(GOOGLE_SITE_VERIFICATION);
+    expect(rootRoute).toContain("GOOGLE_SITE_VERIFICATION");
+    expect(GOOGLE_SITE_VERIFICATION).toMatch(/^[A-Za-z0-9_-]{20,}$/);
   });
 
   it("detects a live verification meta tag", () => {
