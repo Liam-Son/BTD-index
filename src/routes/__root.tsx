@@ -12,6 +12,7 @@ import { useEffect, type ReactNode } from "react";
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
 import { GOOGLE_SITE_VERIFICATION } from "../lib/seo-verification";
+import { siteJsonLd } from "../lib/structured-data";
 
 function NotFoundComponent() {
   return (
@@ -88,31 +89,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { name: "twitter:card", content: "summary_large_image" },
     ],
     scripts: [
-      {
-        type: "application/ld+json",
-        children: JSON.stringify({
-          "@context": "https://schema.org",
-          "@graph": [
-            {
-              "@type": "Organization",
-              "@id": "https://dip-finder-score.lovable.app/#organization",
-              name: "BTD Index™",
-              url: "https://dip-finder-score.lovable.app",
-              description:
-                "Quantitative research terminal publishing the BTD Score, a 0-100 buy-the-dip attractiveness rating for global stocks, crypto, ETFs and commodities.",
-            },
-            {
-              "@type": "WebSite",
-              "@id": "https://dip-finder-score.lovable.app/#website",
-              name: "BTD Index™ — Quantitative Buy-the-Dip Terminal",
-              url: "https://dip-finder-score.lovable.app",
-              publisher: { "@id": "https://dip-finder-score.lovable.app/#organization" },
-              description:
-                "Live buy-the-dip rankings scoring 60+ global assets 0-100 on valuation, momentum, market fear, quality and risk.",
-            },
-          ],
-        }),
-      },
+      { type: "application/ld+json", children: JSON.stringify(siteJsonLd) },
     ],
     links: [
       {
