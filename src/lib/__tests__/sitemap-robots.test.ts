@@ -4,7 +4,7 @@ import { describe, expect, it } from "vitest";
 import { BASE_URL, buildSitemapXml, sitemapEntries } from "../sitemap";
 import { canonicalRedirect } from "../../server";
 
-const CANONICAL_PATHS = ["/", "/stocks"];
+const CANONICAL_PATHS = ["/", "/stocks", "/crypto"];
 
 const robots = readFileSync(resolve(process.cwd(), "public/robots.txt"), "utf8");
 

@@ -15,7 +15,7 @@ const BASE_URL = (
 import { REQUIRED_SCHEMA_TYPES, validateStructuredData } from "../src/lib/structured-data.ts";
 
 const GOOGLE_SITE_VERIFICATION = "NtTwNfTt1oLEPfKEH2vqTZ_YMNqkWYVH-sEmAy5yvJM";
-const CANONICAL_PATHS = ["/", "/stocks"];
+const CANONICAL_PATHS = ["/", "/stocks", "/crypto"];
 
 const failures = [];
 const ok = (msg) => console.log(`PASS  ${msg}`);
