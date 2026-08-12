@@ -11,6 +11,7 @@ export interface SitemapEntry {
 export const sitemapEntries: SitemapEntry[] = [
   { path: "/", changefreq: "hourly", priority: "1.0" },
   { path: "/stocks", changefreq: "hourly", priority: "0.9" },
+  { path: "/crypto", changefreq: "hourly", priority: "0.9" },
 ];
 
 export function buildSitemapXml(entries: SitemapEntry[] = sitemapEntries): string {
