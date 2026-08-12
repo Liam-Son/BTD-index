@@ -124,6 +124,12 @@ function Terminal() {
             >
               Stocks to buy on the dip
             </Link>
+            <Link
+              to="/crypto"
+              className="rounded-sm border border-border px-2 py-1 hover:text-foreground"
+            >
+              Crypto to buy on the dip
+            </Link>
             <span className="flex items-center gap-1.5">
               <span
                 className={`h-1.5 w-1.5 rounded-full ${isFetching ? "live-dot bg-warn" : "bg-up"}`}
