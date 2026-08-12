@@ -185,9 +185,14 @@ function StocksPage() {
         </section>
 
         <footer className="border-t border-border pt-4 text-[11px] leading-relaxed text-muted-foreground">
-          <Link to="/" className="text-primary hover:underline">
-            ← Back to the full BTD Index™ terminal
-          </Link>
+          <div className="flex flex-wrap gap-4">
+            <Link to="/" className="text-primary hover:underline">
+              ← Back to the full BTD Index™ terminal
+            </Link>
+            <Link to="/crypto" className="text-primary hover:underline">
+              Crypto to buy on the dip →
+            </Link>
+          </div>
           <p className="mt-2">
             Data from Yahoo Finance and alternative.me. Quantitative research signals only — not
             investment advice.
