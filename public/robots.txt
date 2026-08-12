@@ -16,5 +16,6 @@ Allow: /
 Disallow: /*?
 Allow: /$
 Allow: /stocks$
+Allow: /crypto$
 
 Sitemap: https://dip-finder-score.lovable.app/sitemap.xml
