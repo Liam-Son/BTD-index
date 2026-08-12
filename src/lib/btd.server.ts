@@ -408,10 +408,25 @@ export async function buildRankings(): Promise<RankingsPayload> {
     });
     const momentum = momentumScore(d.base.rsi);
     const fearC = fearScore(fear.fearGreed, fear.vix);
+    // Crypto has no ROE or debt-to-equity; the closest structural analogue is
+    // network scale / liquidity, so large caps score modestly above neutral.
+    const mcap = d.base.marketCap ?? 0;
+    const qualityFallback =
+      d.base.assetClass === "ETF" || d.base.assetClass === "Index"
+        ? 60
+        : d.base.assetClass === "Crypto"
+          ? mcap >= 2e11
+            ? 62
+            : mcap >= 2e10
+              ? 54
+              : mcap >= 5e9
+                ? 46
+                : 38
+          : 50;
     const quality = qualityScore(
       d.base.fundamentals.roe,
       d.base.fundamentals.debtToEquity,
-      d.base.assetClass === "ETF" || d.base.assetClass === "Index" ? 60 : 50,
+      qualityFallback,
     );
     const risk = riskScore(d.base.fundamentals.beta, d.vol);
 

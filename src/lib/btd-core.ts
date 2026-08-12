@@ -163,6 +163,13 @@ export function stdev(values: number[]): number {
 // Component engines (each returns 0-100)
 // ---------------------------------------------------------------------------
 
+/**
+ * Shrinkage applied to any factor that has no reported fundamental behind it
+ * (e.g. crypto has no P/E, P/B, ROE or debt-to-equity). Proxy signals are
+ * pulled 45% toward neutral so unmeasurable factors can't inflate the score.
+ */
+export const PROXY_SHRINK = 0.55;
+
 /** V — relative valuation vs. industry peers. Lower multiples score higher. */
 export function valuationScore(args: {
   pe: number | null;
@@ -182,9 +189,14 @@ export function valuationScore(args: {
     bits.push(`P/B ${args.pb.toFixed(1)}`);
   }
   if (!parts.length) {
+    // No earnings or book value exists (crypto, commodities, most indices), so
+    // P/E and P/B are undefined. We fall back to a drawdown-implied cheapness
+    // proxy and shrink it toward neutral (50) so an unmeasurable factor cannot
+    // out-score a genuinely cheap, fundamentally valued equity.
+    const raw = args.fallback ?? 50;
     return {
-      value: args.fallback ?? 50,
-      detail: "Drawdown-implied value (no reported multiples)",
+      value: clamp(50 + (raw - 50) * PROXY_SHRINK),
+      detail: "No P/E or P/B — drawdown-implied proxy (shrunk to neutral)",
       proxy: true,
     };
   }
@@ -230,7 +242,12 @@ export function qualityScore(
   fallback: number | null,
 ): { value: number; detail: string; proxy: boolean } {
   if (roe === null && debtToEquity === null) {
-    return { value: fallback ?? 50, detail: "No issuer fundamentals", proxy: true };
+    const raw = fallback ?? 50;
+    return {
+      value: clamp(50 + (raw - 50) * PROXY_SHRINK),
+      detail: "No ROE / debt data — structural proxy (shrunk to neutral)",
+      proxy: true,
+    };
   }
   const roeScore = roe === null ? 50 : clamp((roe / 0.2) * 100);
   const debtScore = debtToEquity === null ? 50 : clamp(100 - (debtToEquity / 2) * 100);
@@ -299,7 +316,13 @@ export function composeBtd(input: ScoreInput): {
   });
 
   const score = clamp(factors.reduce((acc, f) => acc + f.value * f.weight, 0));
-  const confidence = clamp(100 - stdev(factors.map((f) => f.value)), 0, 100);
+  // Every proxied factor removes confidence in proportion to its weight.
+  const proxyWeight = factors.reduce((acc, f) => acc + (f.proxy ? f.weight : 0), 0);
+  const confidence = clamp(
+    100 - stdev(factors.map((f) => f.value)) - proxyWeight * 45,
+    0,
+    100,
+  );
 
   const reasons: string[] = [];
   if (input.valuation.value >= 65 && !input.valuation.proxy) reasons.push("Undervalued vs peers");
