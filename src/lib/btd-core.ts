@@ -316,7 +316,13 @@ export function composeBtd(input: ScoreInput): {
   });
 
   const score = clamp(factors.reduce((acc, f) => acc + f.value * f.weight, 0));
-  const confidence = clamp(100 - stdev(factors.map((f) => f.value)), 0, 100);
+  // Every proxied factor removes confidence in proportion to its weight.
+  const proxyWeight = factors.reduce((acc, f) => acc + (f.proxy ? f.weight : 0), 0);
+  const confidence = clamp(
+    100 - stdev(factors.map((f) => f.value)) - proxyWeight * 45,
+    0,
+    100,
+  );
 
   const reasons: string[] = [];
   if (input.valuation.value >= 65 && !input.valuation.proxy) reasons.push("Undervalued vs peers");
