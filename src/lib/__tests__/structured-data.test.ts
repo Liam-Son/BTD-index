@@ -3,6 +3,7 @@ import { resolve } from "node:path";
 import { describe, expect, it } from "vitest";
 import { BASE_URL } from "../sitemap";
 import { FAQ } from "../../routes/stocks";
+import { FAQ as CRYPTO_FAQ } from "../../routes/crypto";
 import {
   REQUIRED_SCHEMA_TYPES,
   buildFaqJsonLd,
@@ -16,6 +17,7 @@ import {
 const read = (p: string) => readFileSync(resolve(process.cwd(), p), "utf8");
 const rootRoute = read("src/routes/__root.tsx");
 const stocksRoute = read("src/routes/stocks.tsx");
+const cryptoRoute = read("src/routes/crypto.tsx");
 
 const wrap = (json: string) => `<script type="application/ld+json">${json}</script>`;
 
@@ -67,6 +69,7 @@ describe("structured data (source)", () => {
   it("keeps the root head wired to the shared site schema", () => {
     expect(rootRoute).toContain("siteJsonLd");
     expect(stocksRoute).toContain("buildFaqJsonLd(FAQ)");
+    expect(cryptoRoute).toContain("buildFaqJsonLd(FAQ)");
   });
 
   it("declares Organization and WebSite in the root head", () => {
@@ -88,9 +91,16 @@ describe("structured data (source)", () => {
     expect(validateStructuredData(html, "/stocks")).toEqual([]);
   });
 
+  it("declares a valid FAQPage on /crypto", () => {
+    const html = [rootBlocks, wrap(JSON.stringify(buildFaqJsonLd(CRYPTO_FAQ)))].join("\n");
+    expect(validateStructuredData(html, "/crypto")).toEqual([]);
+  });
+
   it("keeps FAQ answers substantive", () => {
-    expect(FAQ.length).toBeGreaterThanOrEqual(3);
-    for (const f of FAQ) expect(f.a.length).toBeGreaterThan(80);
+    for (const list of [FAQ, CRYPTO_FAQ]) {
+      expect(list.length).toBeGreaterThanOrEqual(3);
+      for (const f of list) expect(f.a.length).toBeGreaterThan(80);
+    }
   });
 });
 

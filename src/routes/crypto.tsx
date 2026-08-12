@@ -6,31 +6,31 @@ import { RankingsTable } from "@/components/btd/RankingsTable";
 import { RatingBadge } from "@/components/btd/RatingBadge";
 import { buildFaqJsonLd, type FaqItem } from "@/lib/structured-data";
 
-const TITLE = "Stocks to Buy on the Dip — Live BTD Index™ Equity Rankings";
+const TITLE = "Crypto to Buy on the Dip — Live BTD Index™ Crypto Rankings";
 const DESCRIPTION =
-  "Quantitative rankings of global stocks to buy on the dip, scored 0–100 on valuation, oversold momentum, market fear, quality and risk. Repriced every 5 minutes.";
-const URL = "https://dip-finder-score.lovable.app/stocks";
+  "Quantitative rankings of major cryptocurrencies to buy on the dip, scored 0–100 on drawdown value, oversold momentum, market fear and realized-volatility risk. Repriced every 5 minutes.";
+const URL = "https://dip-finder-score.lovable.app/crypto";
 
 export const FAQ: FaqItem[] = [
   {
-    q: "What does it mean to buy the dip in stocks?",
-    a: "Buying the dip means adding to a stock after its price falls below recent levels, on the thesis that the decline is driven by sentiment rather than a permanent change in fundamentals. BTD Index™ tests that thesis quantitatively instead of relying on intuition.",
+    q: "What does it mean to buy the dip in crypto?",
+    a: "Buying the dip in crypto means accumulating a coin after a sharp drawdown, on the thesis that the sell-off is driven by leverage flushes and sentiment rather than a permanent break in the asset's adoption or network fundamentals. BTD Index™ tests that thesis with data instead of intuition.",
   },
   {
-    q: "How is the BTD Score for a stock calculated?",
-    a: "Each equity is scored as 0.40 × Valuation + 0.25 × Momentum + 0.20 × Fear + 0.10 × Quality + 0.05 × Risk. Valuation uses P/E and P/B percentiles against sector peers, momentum uses RSI(14), fear uses the Fear & Greed Index and VIX, quality blends ROE and debt-to-equity, and risk uses beta.",
+    q: "How is the BTD Score for a cryptocurrency calculated?",
+    a: "Crypto uses the same 0.40 × Valuation + 0.25 × Momentum + 0.20 × Fear + 0.10 × Quality + 0.05 × Risk formula as equities. Because coins have no P/E or P/B, valuation and quality fall back to drawdown-implied value proxies, momentum uses RSI(14), fear uses the Fear & Greed Index and VIX, and risk uses annualized realized volatility as a beta proxy.",
   },
   {
-    q: "What is a good BTD Score for a stock?",
-    a: "Scores above 80 are flagged as extreme opportunity, 65–80 as strong opportunity, 50–65 as neutral accumulation and below 35 as avoid. Higher scores mean more of the dip is explained by fear and cheapness rather than deteriorating quality.",
+    q: "What is a good BTD Score for a coin?",
+    a: "Scores above 80 flag extreme opportunity, 65–80 strong opportunity, 50–65 neutral accumulation and below 35 avoid. A high score means the drawdown is mostly explained by fear and stretched technicals rather than by risk that keeps compounding against the holder.",
   },
   {
-    q: "How often do the stock rankings update?",
-    a: "Prices, fundamentals and sentiment inputs are re-fetched and the whole equity board is re-scored every five minutes during and outside market hours.",
+    q: "How often do the crypto rankings update?",
+    a: "Crypto trades continuously, so prices, momentum and sentiment inputs are re-fetched and the whole board is re-scored every five minutes, twenty-four hours a day including weekends.",
   },
 ];
 
-export const Route = createFileRoute("/stocks")({
+export const Route = createFileRoute("/crypto")({
   head: () => ({
     meta: [
       { title: TITLE },
@@ -42,16 +42,14 @@ export const Route = createFileRoute("/stocks")({
       { name: "twitter:card", content: "summary_large_image" },
     ],
     links: [{ rel: "canonical", href: URL }],
-    scripts: [
-      { type: "application/ld+json", children: JSON.stringify(buildFaqJsonLd(FAQ)) },
-    ],
+    scripts: [{ type: "application/ld+json", children: JSON.stringify(buildFaqJsonLd(FAQ)) }],
   }),
-  component: StocksPage,
+  component: CryptoPage,
 });
 
 const REFRESH_MS = 5 * 60 * 1000;
 
-function StocksPage() {
+function CryptoPage() {
   const { data, isPending, error, dataUpdatedAt } = useQuery({
     queryKey: ["btd", "rankings"],
     queryFn: () => getRankings(),
@@ -60,8 +58,8 @@ function StocksPage() {
     staleTime: REFRESH_MS,
   });
 
-  const stocks = (data?.assets ?? []).filter((a) => a.assetClass === "Stock");
-  const top = stocks[0];
+  const coins = (data?.assets ?? []).filter((a) => a.assetClass === "Crypto");
+  const top = coins[0];
 
   return (
     <main className="min-h-screen bg-background">
@@ -72,16 +70,15 @@ function StocksPage() {
               BTD.Index™
             </Link>
             <span className="px-2">/</span>
-            <span className="text-foreground">Stocks</span>
+            <span className="text-foreground">Crypto</span>
           </nav>
           <h1 className="max-w-3xl text-3xl font-bold leading-tight">
-            Stocks to Buy on the Dip — Live BTD Index™ Equity Rankings
+            Crypto to Buy on the Dip — Live BTD Index™ Crypto Rankings
           </h1>
           <p className="mt-3 max-w-2xl text-sm leading-relaxed text-muted-foreground">
-            Every US and global equity in our universe is re-scored every five minutes on how
-            statistically attractive its drawdown is: peer-relative valuation, oversold momentum,
-            market-wide fear, balance-sheet quality and beta risk — combined into one 0–100 BTD
-            Score.
+            Every major cryptocurrency in our universe is re-scored every five minutes on how
+            statistically attractive its drawdown is: distance from the 52-week high, oversold
+            momentum, market-wide fear and realized volatility — combined into one 0–100 BTD Score.
           </p>
         </div>
       </header>
@@ -90,17 +87,17 @@ function StocksPage() {
         <section className="grid gap-4 md:grid-cols-3">
           <div className="rounded border border-border bg-surface p-5">
             <p className="text-[10px] uppercase tracking-widest text-muted-foreground">
-              Equities tracked
+              Coins tracked
             </p>
-            <p className="tabular mt-1 text-3xl font-bold">{stocks.length || "—"}</p>
+            <p className="tabular mt-1 text-3xl font-bold">{coins.length || "—"}</p>
           </div>
           <div className="rounded border border-border bg-surface p-5">
             <p className="text-[10px] uppercase tracking-widest text-muted-foreground">
               Average BTD Score
             </p>
             <p className="tabular mt-1 text-3xl font-bold">
-              {stocks.length
-                ? (stocks.reduce((s, a) => s + a.btdScore, 0) / stocks.length).toFixed(1)
+              {coins.length
+                ? (coins.reduce((s, a) => s + a.btdScore, 0) / coins.length).toFixed(1)
                 : "—"}
             </p>
           </div>
@@ -126,7 +123,7 @@ function StocksPage() {
 
         {error && (
           <div className="rounded border border-down/40 bg-down/10 px-4 py-3 text-sm text-down">
-            Equity data feed unavailable. Retrying on the next 5-minute cycle.
+            Crypto data feed unavailable. Retrying on the next 5-minute cycle.
           </div>
         )}
 
@@ -138,30 +135,30 @@ function StocksPage() {
           </div>
         ) : (
           <RankingsTable
-            assets={stocks}
+            assets={coins}
             updatedAt={new Date(dataUpdatedAt || Date.now()).toISOString()}
           />
         )}
 
         <section className="rounded border border-border bg-surface p-6">
-          <h2 className="text-xl font-bold">How to read the equity board</h2>
+          <h2 className="text-xl font-bold">How to read the crypto board</h2>
           <div className="mt-4 grid gap-4 md:grid-cols-2">
             {[
               [
                 "Valuation (40%)",
-                "P/E and P/B percentiles against sector peers. A stock trading cheap relative to its own industry earns the most points.",
+                "Coins have no earnings multiples, so value is inferred from how far price sits below its 52-week high relative to the rest of the crypto universe.",
               ],
               [
                 "Momentum (25%)",
-                "RSI(14). Deeply oversold prints score highest — the dip is technically stretched, not merely soft.",
+                "RSI(14). Deeply oversold prints score highest — capitulation, not a slow bleed.",
               ],
               [
                 "Fear & sentiment (20%)",
-                "Fear & Greed Index and VIX. Broad panic tends to discount good businesses alongside bad ones.",
+                "Fear & Greed Index and VIX. Crypto drawdowns cluster with broad risk-off panic, which is when discounts are widest.",
               ],
               [
                 "Quality & risk (15%)",
-                "ROE and debt-to-equity confirm the business can survive the drawdown; beta scales how violent the recovery path may be.",
+                "Annualized realized volatility stands in for beta, penalising coins whose recovery path is likely to be violent.",
               ],
             ].map(([h, p]) => (
               <div key={h} className="rounded-sm border border-border bg-surface-2 p-4">
@@ -189,13 +186,13 @@ function StocksPage() {
             <Link to="/" className="text-primary hover:underline">
               ← Back to the full BTD Index™ terminal
             </Link>
-            <Link to="/crypto" className="text-primary hover:underline">
-              Crypto to buy on the dip →
+            <Link to="/stocks" className="text-primary hover:underline">
+              Stocks to buy on the dip →
             </Link>
           </div>
           <p className="mt-2">
-            Data from Yahoo Finance and alternative.me. Quantitative research signals only — not
-            investment advice.
+            Data from CoinGecko, Yahoo Finance and alternative.me. Quantitative research signals
+            only — not investment advice.
           </p>
         </footer>
       </div>

@@ -54,6 +54,7 @@ export function nodesOfType(nodes: JsonLdNode[], type: string): JsonLdNode[] {
 export const REQUIRED_SCHEMA_TYPES: Record<string, string[]> = {
   "/": ["Organization", "WebSite"],
   "/stocks": ["Organization", "WebSite", "FAQPage"],
+  "/crypto": ["Organization", "WebSite", "FAQPage"],
 };
 
 const REQUIRED_PROPS: Record<string, string[]> = {
