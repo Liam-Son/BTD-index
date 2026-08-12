@@ -242,7 +242,12 @@ export function qualityScore(
   fallback: number | null,
 ): { value: number; detail: string; proxy: boolean } {
   if (roe === null && debtToEquity === null) {
-    return { value: fallback ?? 50, detail: "No issuer fundamentals", proxy: true };
+    const raw = fallback ?? 50;
+    return {
+      value: clamp(50 + (raw - 50) * PROXY_SHRINK),
+      detail: "No ROE / debt data — structural proxy (shrunk to neutral)",
+      proxy: true,
+    };
   }
   const roeScore = roe === null ? 50 : clamp((roe / 0.2) * 100);
   const debtScore = debtToEquity === null ? 50 : clamp(100 - (debtToEquity / 2) * 100);
