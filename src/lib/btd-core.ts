@@ -182,9 +182,14 @@ export function valuationScore(args: {
     bits.push(`P/B ${args.pb.toFixed(1)}`);
   }
   if (!parts.length) {
+    // No earnings or book value exists (crypto, commodities, most indices), so
+    // P/E and P/B are undefined. We fall back to a drawdown-implied cheapness
+    // proxy and shrink it toward neutral (50) so an unmeasurable factor cannot
+    // out-score a genuinely cheap, fundamentally valued equity.
+    const raw = args.fallback ?? 50;
     return {
-      value: args.fallback ?? 50,
-      detail: "Drawdown-implied value (no reported multiples)",
+      value: clamp(50 + (raw - 50) * PROXY_SHRINK),
+      detail: "No P/E or P/B — drawdown-implied proxy (shrunk to neutral)",
       proxy: true,
     };
   }
