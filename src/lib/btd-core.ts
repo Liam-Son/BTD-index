@@ -163,6 +163,13 @@ export function stdev(values: number[]): number {
 // Component engines (each returns 0-100)
 // ---------------------------------------------------------------------------
 
+/**
+ * Shrinkage applied to any factor that has no reported fundamental behind it
+ * (e.g. crypto has no P/E, P/B, ROE or debt-to-equity). Proxy signals are
+ * pulled 45% toward neutral so unmeasurable factors can't inflate the score.
+ */
+export const PROXY_SHRINK = 0.55;
+
 /** V — relative valuation vs. industry peers. Lower multiples score higher. */
 export function valuationScore(args: {
   pe: number | null;
