@@ -18,10 +18,18 @@ const UA = {
     "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122 Safari/537.36",
 };
 
+// Top ~100 US companies by market cap (S&P 500 mega/large caps).
 const UNIVERSE = [
-  "AAPL", "MSFT", "NVDA", "AMZN", "GOOGL", "META", "TSLA", "AVGO", "JPM", "BAC",
-  "UNH", "PFE", "MRK", "KO", "PEP", "NKE", "DIS", "INTC", "AMD", "XOM",
-  "CVX", "ASML", "TSM", "BABA", "TM", "SONY", "NVO", "SAP", "SHEL", "RY",
+  "AAPL", "MSFT", "NVDA", "AMZN", "GOOGL", "GOOG", "META", "TSLA", "AVGO", "BRK-B",
+  "LLY", "JPM", "V", "XOM", "WMT", "UNH", "MA", "COST", "HD", "PG",
+  "ORCL", "JNJ", "NFLX", "BAC", "CRM", "ABBV", "CVX", "MRK", "KO", "AMD",
+  "PEP", "ADBE", "LIN", "TMO", "MCD", "CSCO", "WFC", "ACN", "ABT", "GE",
+  "DHR", "IBM", "QCOM", "TXN", "VZ", "CAT", "INTU", "AXP", "NOW", "PFE",
+  "AMGN", "ISRG", "MS", "GS", "PM", "SPGI", "LOW", "RTX", "BX", "NEE",
+  "UBER", "UNP", "HON", "BKNG", "PGR", "SYK", "T", "VRTX", "BLK", "ELV",
+  "SCHW", "ADI", "C", "LRCX", "AMAT", "TJX", "BA", "MDT", "DE", "CB",
+  "REGN", "ADP", "PLD", "GILD", "MMC", "MU", "CI", "ETN", "CVS", "BSX",
+  "LMT", "ZTS", "FI", "SO", "MO", "SHW", "DIS", "NKE", "INTC", "CMCSA",
 ];
 
 const BENCH = "^GSPC";
