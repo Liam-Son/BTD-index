@@ -239,6 +239,8 @@ function Terminal() {
 
         {data && <FearPanel fear={data.fear} assetCount={data.assets.length} />}
 
+        <BacktestChart />
+
         {error && (
           <div className="rounded border border-down/40 bg-down/10 px-4 py-3 text-sm text-down">
             Market data feed unavailable. Retrying on the next 5-minute cycle.
