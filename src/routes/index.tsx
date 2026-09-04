@@ -6,6 +6,7 @@ import { fmtPct, ratingFor, type RankedAsset } from "@/lib/btd-core";
 import { FearPanel } from "@/components/btd/FearPanel";
 import { RankingsTable } from "@/components/btd/RankingsTable";
 import { RatingBadge } from "@/components/btd/RatingBadge";
+import { BacktestChart } from "@/components/btd/BacktestChart";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -237,6 +238,8 @@ function Terminal() {
         </section>
 
         {data && <FearPanel fear={data.fear} assetCount={data.assets.length} />}
+
+        <BacktestChart />
 
         {error && (
           <div className="rounded border border-down/40 bg-down/10 px-4 py-3 text-sm text-down">
