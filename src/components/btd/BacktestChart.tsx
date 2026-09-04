@@ -43,23 +43,36 @@ export function BacktestChart() {
     refetchOnWindowFocus: false,
   });
 
+  const growth = (data?.points ?? []).map((p) => ({
+    date: p.date,
+    btd: Math.round((100 + p.btd) * 100) / 100,
+    benchmark: Math.round((100 + p.benchmark) * 100) / 100,
+  }));
+
   return (
     <section className="rounded border border-border bg-surface">
-      <div className="flex flex-wrap items-end justify-between gap-3 border-b border-border px-4 py-3">
+      <div className="flex flex-wrap items-start justify-between gap-3 px-6 pt-6">
         <div>
-          <p className="text-[10px] uppercase tracking-widest text-muted-foreground">
-            Strategy backtest
+          <p className="text-[10px] font-semibold uppercase tracking-widest text-primary">
+            Historical performance
           </p>
-          <h2 className="text-base font-bold">
-            BTD Index™ rule vs. S&amp;P 500 buy &amp; hold — cumulative P&amp;L
-          </h2>
+          <h2 className="mt-1 text-3xl font-bold tracking-tight">Growth of 100</h2>
+          <p className="mt-2 max-w-lg text-[11px] leading-relaxed text-muted-foreground">
+            Equal-weight entry when an asset&apos;s BTD score crosses {BUY_THRESHOLD}, exit when it
+            falls below {SELL_THRESHOLD}. Weekly rebalance, cash earns 0%.
+            {data ? ` ${data.universeSize} names · ${data.startDate} → ${data.endDate}.` : ""}
+          </p>
         </div>
-        <p className="max-w-md text-[11px] leading-relaxed text-muted-foreground">
-          Equal-weight entry when an asset&apos;s BTD score crosses {BUY_THRESHOLD}, exit when it
-          falls below {SELL_THRESHOLD}. Weekly rebalance, cash earns 0%.
-          {data ? ` ${data.universeSize} names · ${data.startDate} → ${data.endDate}.` : ""}
-        </p>
+        <div className="flex items-center gap-4 text-[11px]">
+          <span className="flex items-center gap-1.5 text-primary">
+            <span className="h-1.5 w-1.5 rounded-full bg-primary" /> BTD Index™
+          </span>
+          <span className="flex items-center gap-1.5 text-muted-foreground">
+            <span className="h-1.5 w-1.5 rounded-full bg-muted-foreground" /> S&amp;P 500
+          </span>
+        </div>
       </div>
+
 
       {error ? (
         <p className="px-4 py-6 text-sm text-down">
@@ -69,28 +82,31 @@ export function BacktestChart() {
         <div className="m-4 h-72 animate-pulse rounded-sm bg-surface-2" />
       ) : (
         <>
-          <div className="h-80 px-2 py-4">
+          <div className="h-96 px-4 py-6">
             <ResponsiveContainer width="100%" height="100%">
-              <AreaChart data={data.points} margin={{ top: 4, right: 16, bottom: 0, left: 0 }}>
+              <AreaChart data={growth} margin={{ top: 4, right: 16, bottom: 0, left: 0 }}>
                 <defs>
                   <linearGradient id="btdFill" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%" stopColor="var(--color-primary)" stopOpacity={0.35} />
+                    <stop offset="0%" stopColor="var(--color-primary)" stopOpacity={0.22} />
                     <stop offset="100%" stopColor="var(--color-primary)" stopOpacity={0} />
                   </linearGradient>
                 </defs>
                 <CartesianGrid stroke="var(--color-border)" strokeDasharray="2 4" vertical={false} />
                 <XAxis
                   dataKey="date"
-                  tick={{ fontSize: 10, fill: "var(--color-muted-foreground)" }}
-                  tickFormatter={(d: string) => d.slice(0, 7)}
-                  minTickGap={40}
+                  tick={{ fontSize: 11, fill: "var(--color-muted-foreground)" }}
+                  tickFormatter={(d: string) => d.slice(0, 4)}
+                  minTickGap={48}
+                  tickLine={false}
                   stroke="var(--color-border)"
                 />
                 <YAxis
-                  tick={{ fontSize: 10, fill: "var(--color-muted-foreground)" }}
-                  tickFormatter={(v: number) => `${v.toFixed(0)}%`}
-                  width={48}
-                  stroke="var(--color-border)"
+                  tick={{ fontSize: 11, fill: "var(--color-muted-foreground)" }}
+                  tickFormatter={(v: number) => v.toFixed(0)}
+                  width={44}
+                  tickLine={false}
+                  axisLine={false}
+                  domain={["dataMin - 10", "dataMax + 10"]}
                 />
                 <Tooltip
                   contentStyle={{
@@ -100,26 +116,24 @@ export function BacktestChart() {
                     fontSize: 11,
                   }}
                   labelStyle={{ color: "var(--color-muted-foreground)" }}
-                  formatter={(v: number, name: string) => [`${v.toFixed(2)}%`, name]}
+                  formatter={(v: number, name: string) => [v.toFixed(1), name]}
                 />
-                <Legend wrapperStyle={{ fontSize: 11 }} />
                 <Area
                   type="monotone"
                   dataKey="btd"
-                  name="BTD Index™ rule"
+                  name="BTD Index™"
                   stroke="var(--color-primary)"
                   fill="url(#btdFill)"
-                  strokeWidth={2}
+                  strokeWidth={2.5}
                   dot={false}
                 />
                 <Area
                   type="monotone"
                   dataKey="benchmark"
-                  name="S&P 500 buy & hold"
+                  name="S&P 500"
                   stroke="var(--color-muted-foreground)"
                   fill="none"
-                  strokeWidth={1.5}
-                  strokeDasharray="4 3"
+                  strokeWidth={2}
                   dot={false}
                 />
               </AreaChart>
