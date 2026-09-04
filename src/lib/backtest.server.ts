@@ -2,7 +2,7 @@
 //
 // Rule under test: buy (equal weight) any universe member whose historical BTD
 // score is >= 80, and exit a held position once its score falls <= 20.
-// Rebalanced weekly, uninvested capital sits in cash (0% carry).
+// Rebalanced weekly, uninvested capital is parked in the S&P 500 (SPY proxy).
 //
 // Historical fundamentals (P/E, P/B, ROE, D/E) are not available point-in-time
 // from the free feeds, so the backtest uses the time-series-observable subset of
@@ -156,6 +156,11 @@ export async function runBacktest(): Promise<BacktestPayload> {
   for (let i = 0; i < n; i++) {
     const v = vix[i];
     const fear = typeof v === "number" ? normalize(v, 12, 38) : 50;
+
+    // Uninvested capital is parked in the S&P 500 (SPY proxy) instead of 0% cash.
+    if (i > 0 && cash > 0) {
+      cash *= bench.closes[i]! / bench.closes[i - 1]!;
+    }
 
     if (i > 0 && i % REBALANCE_EVERY === 0) {
       const scores = aligned.map((c) => scoreAt(c, i, fear));
