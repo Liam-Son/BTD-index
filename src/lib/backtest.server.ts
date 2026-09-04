@@ -157,6 +157,11 @@ export async function runBacktest(): Promise<BacktestPayload> {
     const v = vix[i];
     const fear = typeof v === "number" ? normalize(v, 12, 38) : 50;
 
+    // Uninvested capital is parked in the S&P 500 (SPY proxy) instead of 0% cash.
+    if (i > 0 && cash > 0) {
+      cash *= bench.closes[i]! / bench.closes[i - 1]!;
+    }
+
     if (i > 0 && i % REBALANCE_EVERY === 0) {
       const scores = aligned.map((c) => scoreAt(c, i, fear));
 
