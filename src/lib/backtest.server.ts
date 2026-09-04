@@ -2,7 +2,7 @@
 //
 // Rule under test: buy (equal weight) any universe member whose historical BTD
 // score is >= 80, and exit a held position once its score falls <= 20.
-// Rebalanced weekly, uninvested capital sits in cash (0% carry).
+// Rebalanced weekly, uninvested capital is parked in the S&P 500 (SPY proxy).
 //
 // Historical fundamentals (P/E, P/B, ROE, D/E) are not available point-in-time
 // from the free feeds, so the backtest uses the time-series-observable subset of
