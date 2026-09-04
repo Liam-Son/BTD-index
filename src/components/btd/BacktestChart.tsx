@@ -43,23 +43,36 @@ export function BacktestChart() {
     refetchOnWindowFocus: false,
   });
 
+  const growth = (data?.points ?? []).map((p) => ({
+    date: p.date,
+    btd: Math.round((100 + p.btd) * 100) / 100,
+    benchmark: Math.round((100 + p.benchmark) * 100) / 100,
+  }));
+
   return (
     <section className="rounded border border-border bg-surface">
-      <div className="flex flex-wrap items-end justify-between gap-3 border-b border-border px-4 py-3">
+      <div className="flex flex-wrap items-start justify-between gap-3 px-6 pt-6">
         <div>
-          <p className="text-[10px] uppercase tracking-widest text-muted-foreground">
-            Strategy backtest
+          <p className="text-[10px] font-semibold uppercase tracking-widest text-primary">
+            Historical performance
           </p>
-          <h2 className="text-base font-bold">
-            BTD Index™ rule vs. S&amp;P 500 buy &amp; hold — cumulative P&amp;L
-          </h2>
+          <h2 className="mt-1 text-3xl font-bold tracking-tight">Growth of 100</h2>
+          <p className="mt-2 max-w-lg text-[11px] leading-relaxed text-muted-foreground">
+            Equal-weight entry when an asset&apos;s BTD score crosses {BUY_THRESHOLD}, exit when it
+            falls below {SELL_THRESHOLD}. Weekly rebalance, cash earns 0%.
+            {data ? ` ${data.universeSize} names · ${data.startDate} → ${data.endDate}.` : ""}
+          </p>
         </div>
-        <p className="max-w-md text-[11px] leading-relaxed text-muted-foreground">
-          Equal-weight entry when an asset&apos;s BTD score crosses {BUY_THRESHOLD}, exit when it
-          falls below {SELL_THRESHOLD}. Weekly rebalance, cash earns 0%.
-          {data ? ` ${data.universeSize} names · ${data.startDate} → ${data.endDate}.` : ""}
-        </p>
+        <div className="flex items-center gap-4 text-[11px]">
+          <span className="flex items-center gap-1.5 text-primary">
+            <span className="h-1.5 w-1.5 rounded-full bg-primary" /> BTD Index™
+          </span>
+          <span className="flex items-center gap-1.5 text-muted-foreground">
+            <span className="h-1.5 w-1.5 rounded-full bg-muted-foreground" /> S&amp;P 500
+          </span>
+        </div>
       </div>
+
 
       {error ? (
         <p className="px-4 py-6 text-sm text-down">
