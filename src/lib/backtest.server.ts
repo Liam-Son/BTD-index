@@ -157,7 +157,7 @@ export async function runBacktest(): Promise<BacktestPayload> {
         const s = scores[idx];
         const p = aligned[idx]![i];
         if (typeof p !== "number") continue;
-        if (s === null || s <= SELL_AT) {
+        if (s == null || s <= SELL_AT) {
           cash += sh * p;
           holdings.delete(idx);
           trades++;
