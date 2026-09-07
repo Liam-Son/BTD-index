@@ -117,11 +117,29 @@ const BUY_AT = 80;
 const SELL_AT = 20;
 const REBALANCE_EVERY = 5; // trading days
 
+/** True when the price at index `i` is at/above its 200-day SMA (trend filter). */
+function aboveTrend(closes: (number | null)[], i: number): boolean {
+  const price = closes[i];
+  if (typeof price !== "number") return false;
+  let sum = 0;
+  let count = 0;
+  for (let k = Math.max(0, i - 199); k <= i; k++) {
+    const c = closes[k];
+    if (typeof c === "number") {
+      sum += c;
+      count++;
+    }
+  }
+  if (count < 100) return false;
+  return price >= sum / count;
+}
+
 export async function runBacktest(
-  thresholds: { buy?: number; sell?: number } = {},
+  thresholds: { buy?: number; sell?: number; trendFilter?: boolean } = {},
 ): Promise<BacktestPayload> {
   const buyAt = thresholds.buy ?? BUY_AT;
   const sellAt = thresholds.sell ?? SELL_AT;
+  const trendFilter = thresholds.trendFilter ?? false;
   const bench = await fetchSeries(BENCH);
   if (!bench) throw new Error("benchmark series unavailable");
   const vixRaw = await fetchSeries("^VIX");
@@ -184,7 +202,13 @@ export async function runBacktest(
       // Entries: any name scoring >= threshold we don't already hold.
       const buys = scores
         .map((s, idx) => ({ s, idx }))
-        .filter((x) => x.s !== null && x.s >= buyAt && !holdings.has(x.idx));
+        .filter(
+          (x) =>
+            x.s !== null &&
+            x.s >= buyAt &&
+            !holdings.has(x.idx) &&
+            (!trendFilter || aboveTrend(aligned[x.idx]!, i)),
+        );
       if (buys.length && cash > 0.01) {
         const per = cash / buys.length;
         for (const b of buys) {
