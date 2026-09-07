@@ -117,7 +117,11 @@ const BUY_AT = 80;
 const SELL_AT = 20;
 const REBALANCE_EVERY = 5; // trading days
 
-export async function runBacktest(): Promise<BacktestPayload> {
+export async function runBacktest(
+  thresholds: { buy?: number; sell?: number } = {},
+): Promise<BacktestPayload> {
+  const buyAt = thresholds.buy ?? BUY_AT;
+  const sellAt = thresholds.sell ?? SELL_AT;
   const bench = await fetchSeries(BENCH);
   if (!bench) throw new Error("benchmark series unavailable");
   const vixRaw = await fetchSeries("^VIX");
