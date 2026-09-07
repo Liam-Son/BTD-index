@@ -27,5 +27,5 @@ export interface BacktestPayload {
   stats: BacktestStats;
 }
 
-export const BUY_THRESHOLD = 80;
-export const SELL_THRESHOLD = 20;
+export const BUY_THRESHOLD = 65;
+export const SELL_THRESHOLD = 35;

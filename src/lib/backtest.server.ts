@@ -113,8 +113,8 @@ function scoreAt(closes: (number | null)[], i: number, fear: number): number | n
   );
 }
 
-const BUY_AT = 80;
-const SELL_AT = 20;
+const BUY_AT = 65;
+const SELL_AT = 35;
 const REBALANCE_EVERY = 5; // trading days
 
 /** True when the price at index `i` is at/above its 200-day SMA (trend filter). */
