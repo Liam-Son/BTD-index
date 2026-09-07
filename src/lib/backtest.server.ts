@@ -117,7 +117,11 @@ const BUY_AT = 80;
 const SELL_AT = 20;
 const REBALANCE_EVERY = 5; // trading days
 
-export async function runBacktest(): Promise<BacktestPayload> {
+export async function runBacktest(
+  thresholds: { buy?: number; sell?: number } = {},
+): Promise<BacktestPayload> {
+  const buyAt = thresholds.buy ?? BUY_AT;
+  const sellAt = thresholds.sell ?? SELL_AT;
   const bench = await fetchSeries(BENCH);
   if (!bench) throw new Error("benchmark series unavailable");
   const vixRaw = await fetchSeries("^VIX");
@@ -170,17 +174,17 @@ export async function runBacktest(): Promise<BacktestPayload> {
         const s = scores[idx];
         const p = aligned[idx]![i];
         if (typeof p !== "number") continue;
-        if (s == null || s <= SELL_AT) {
+        if (s == null || s <= sellAt) {
           cash += sh * p;
           holdings.delete(idx);
           trades++;
         }
       }
 
-      // Entries: any name scoring >= 80 we don't already hold.
+      // Entries: any name scoring >= threshold we don't already hold.
       const buys = scores
         .map((s, idx) => ({ s, idx }))
-        .filter((x) => x.s !== null && x.s >= BUY_AT && !holdings.has(x.idx));
+        .filter((x) => x.s !== null && x.s >= buyAt && !holdings.has(x.idx));
       if (buys.length && cash > 0.01) {
         const per = cash / buys.length;
         for (const b of buys) {
