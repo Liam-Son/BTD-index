@@ -202,7 +202,13 @@ export async function runBacktest(
       // Entries: any name scoring >= threshold we don't already hold.
       const buys = scores
         .map((s, idx) => ({ s, idx }))
-        .filter((x) => x.s !== null && x.s >= buyAt && !holdings.has(x.idx));
+        .filter(
+          (x) =>
+            x.s !== null &&
+            x.s >= buyAt &&
+            !holdings.has(x.idx) &&
+            (!trendFilter || aboveTrend(aligned[x.idx]!, i)),
+        );
       if (buys.length && cash > 0.01) {
         const per = cash / buys.length;
         for (const b of buys) {
