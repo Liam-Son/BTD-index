@@ -1,7 +1,8 @@
 // Server-only historical backtest: BTD Index™ rule vs. S&P 500 buy & hold.
 //
 // Rule under test: buy (equal weight) any universe member whose historical BTD
-// score is >= 80, and exit a held position once its score falls <= 20.
+// score is >= 65 while price is above its 200-day average (trend filter), and
+// exit a held position once its score falls <= 35.
 // Rebalanced weekly, uninvested capital is parked in the S&P 500 (SPY proxy).
 //
 // Historical fundamentals (P/E, P/B, ROE, D/E) are not available point-in-time

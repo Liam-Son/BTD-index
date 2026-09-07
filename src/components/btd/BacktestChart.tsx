@@ -58,9 +58,9 @@ export function BacktestChart() {
           </p>
           <h2 className="mt-1 text-3xl font-bold tracking-tight">Growth of 100</h2>
           <p className="mt-2 max-w-lg text-[11px] leading-relaxed text-muted-foreground">
-            Equal-weight entry when an asset&apos;s BTD score crosses {BUY_THRESHOLD}, exit when it
-            falls below {SELL_THRESHOLD}. Weekly rebalance; uninvested capital is
-            parked in the S&P 500.
+            Equal-weight entry when an asset&apos;s BTD score crosses {BUY_THRESHOLD} while above
+            its 200-day average, exit when it falls below {SELL_THRESHOLD}. Weekly rebalance;
+            uninvested capital is parked in the S&P 500.
             {data ? ` ${data.universeSize} names · ${data.startDate} → ${data.endDate}.` : ""}
           </p>
         </div>
