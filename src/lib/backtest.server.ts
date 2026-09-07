@@ -139,7 +139,7 @@ export async function runBacktest(
 ): Promise<BacktestPayload> {
   const buyAt = thresholds.buy ?? BUY_AT;
   const sellAt = thresholds.sell ?? SELL_AT;
-  const trendFilter = thresholds.trendFilter ?? false;
+  const trendFilter = thresholds.trendFilter ?? true;
   const bench = await fetchSeries(BENCH);
   if (!bench) throw new Error("benchmark series unavailable");
   const vixRaw = await fetchSeries("^VIX");
