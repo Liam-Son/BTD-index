@@ -174,17 +174,17 @@ export async function runBacktest(
         const s = scores[idx];
         const p = aligned[idx]![i];
         if (typeof p !== "number") continue;
-        if (s == null || s <= SELL_AT) {
+        if (s == null || s <= sellAt) {
           cash += sh * p;
           holdings.delete(idx);
           trades++;
         }
       }
 
-      // Entries: any name scoring >= 80 we don't already hold.
+      // Entries: any name scoring >= threshold we don't already hold.
       const buys = scores
         .map((s, idx) => ({ s, idx }))
-        .filter((x) => x.s !== null && x.s >= BUY_AT && !holdings.has(x.idx));
+        .filter((x) => x.s !== null && x.s >= buyAt && !holdings.has(x.idx));
       if (buys.length && cash > 0.01) {
         const per = cash / buys.length;
         for (const b of buys) {
