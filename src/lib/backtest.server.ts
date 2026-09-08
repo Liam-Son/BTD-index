@@ -1,8 +1,9 @@
 // Server-only historical backtest: BTD Index™ rule vs. S&P 500 buy & hold.
 //
 // Rule under test: buy (equal weight) any universe member whose historical BTD
-// score is >= 65 while price is above its 200-day average (trend filter), and
-// exit a held position once its score falls <= 35.
+// score is >= 65, and exit a held position once its score falls <= 35.
+// (A 200-day-trend filter was tested and rejected: it removed the deep-crash
+// entries that drive the strategy's returns.)
 // Rebalanced weekly, uninvested capital is parked in the S&P 500 (SPY proxy).
 //
 // Historical fundamentals (P/E, P/B, ROE, D/E) are not available point-in-time
@@ -41,13 +42,13 @@ interface Series {
   closes: number[];
 }
 
-async function fetchSeries(sym: string): Promise<Series | null> {
+async function fetchSeries(sym: string, attempt = 0): Promise<Series | null> {
   try {
     const res = await fetch(
       `https://query1.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(sym)}?range=${RANGE}&interval=1d`,
       { headers: UA },
     );
-    if (!res.ok) return null;
+    if (!res.ok) throw new Error(`http ${res.status}`);
     const json = (await res.json()) as any;
     const r = json?.chart?.result?.[0];
     const ts: number[] = r?.timestamp ?? [];
@@ -61,9 +62,15 @@ async function fetchSeries(sym: string): Promise<Series | null> {
         closes.push(c);
       }
     }
-    if (closes.length < 300) return null;
+    if (closes.length < 300) throw new Error("short series");
     return { dates, closes };
   } catch {
+    // Yahoo rate-limits intermittently; one retry keeps the universe stable
+    // so backtest stats don't swing on which names happened to load.
+    if (attempt < 1) {
+      await new Promise((r) => setTimeout(r, 800 + Math.random() * 800));
+      return fetchSeries(sym, attempt + 1);
+    }
     return null;
   }
 }
@@ -140,7 +147,7 @@ export async function runBacktest(
 ): Promise<BacktestPayload> {
   const buyAt = thresholds.buy ?? BUY_AT;
   const sellAt = thresholds.sell ?? SELL_AT;
-  const trendFilter = thresholds.trendFilter ?? true;
+  const trendFilter = thresholds.trendFilter ?? false;
   const bench = await fetchSeries(BENCH);
   if (!bench) throw new Error("benchmark series unavailable");
   const vixRaw = await fetchSeries("^VIX");
