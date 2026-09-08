@@ -61,9 +61,15 @@ async function fetchSeries(sym: string, attempt = 0): Promise<Series | null> {
         closes.push(c);
       }
     }
-    if (closes.length < 300) return null;
+    if (closes.length < 300) throw new Error("short series");
     return { dates, closes };
   } catch {
+    // Yahoo rate-limits intermittently; one retry keeps the universe stable
+    // so backtest stats don't swing on which names happened to load.
+    if (attempt < 1) {
+      await new Promise((r) => setTimeout(r, 800 + Math.random() * 800));
+      return fetchSeries(sym, attempt + 1);
+    }
     return null;
   }
 }
