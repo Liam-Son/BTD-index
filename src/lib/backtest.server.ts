@@ -47,7 +47,7 @@ async function fetchSeries(sym: string, attempt = 0): Promise<Series | null> {
       `https://query1.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(sym)}?range=${RANGE}&interval=1d`,
       { headers: UA },
     );
-    if (!res.ok) return null;
+    if (!res.ok) throw new Error(`http ${res.status}`);
     const json = (await res.json()) as any;
     const r = json?.chart?.result?.[0];
     const ts: number[] = r?.timestamp ?? [];
