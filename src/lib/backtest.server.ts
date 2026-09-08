@@ -41,7 +41,7 @@ interface Series {
   closes: number[];
 }
 
-async function fetchSeries(sym: string): Promise<Series | null> {
+async function fetchSeries(sym: string, attempt = 0): Promise<Series | null> {
   try {
     const res = await fetch(
       `https://query1.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(sym)}?range=${RANGE}&interval=1d`,
