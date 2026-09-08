@@ -1,8 +1,9 @@
 // Server-only historical backtest: BTD Index™ rule vs. S&P 500 buy & hold.
 //
 // Rule under test: buy (equal weight) any universe member whose historical BTD
-// score is >= 65 while price is above its 200-day average (trend filter), and
-// exit a held position once its score falls <= 35.
+// score is >= 65, and exit a held position once its score falls <= 35.
+// (A 200-day-trend filter was tested and rejected: it removed the deep-crash
+// entries that drive the strategy's returns.)
 // Rebalanced weekly, uninvested capital is parked in the S&P 500 (SPY proxy).
 //
 // Historical fundamentals (P/E, P/B, ROE, D/E) are not available point-in-time
@@ -146,7 +147,7 @@ export async function runBacktest(
 ): Promise<BacktestPayload> {
   const buyAt = thresholds.buy ?? BUY_AT;
   const sellAt = thresholds.sell ?? SELL_AT;
-  const trendFilter = thresholds.trendFilter ?? true;
+  const trendFilter = thresholds.trendFilter ?? false;
   const bench = await fetchSeries(BENCH);
   if (!bench) throw new Error("benchmark series unavailable");
   const vixRaw = await fetchSeries("^VIX");
