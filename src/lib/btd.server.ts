@@ -226,6 +226,7 @@ async function fetchFear(): Promise<{ fear: MarketFear; issues: string[] }> {
 }
 
 interface CryptoRow {
+  id: string;
   symbol: string;
   name: string;
   logo: string | null;
@@ -252,6 +253,7 @@ async function fetchCrypto(): Promise<{ rows: CryptoRow[]; issues: string[] }> {
     );
     return {
       rows: list.map((c) => ({
+        id: String(c.id),
         symbol: String(c.symbol).toUpperCase(),
         name: String(c.name),
         logo: c.image ?? null,
@@ -350,6 +352,13 @@ export async function buildRankings(): Promise<RankingsPayload> {
         drawdown,
         rsi: rsiFromCloses(closes),
         fundamentals: f,
+        quoteId: u.yahoo,
+        quoteSource: "yahoo",
+        basePrice: price,
+        prevClose: closes[closes.length - 2] ?? price,
+        high52,
+        recentCloses: closes.slice(-16, -1),
+        peerKey: u.assetClass === "Stock" ? (f.sector ?? "Other Equities") : u.assetClass,
       },
     });
   });
@@ -375,6 +384,13 @@ export async function buildRankings(): Promise<RankingsPayload> {
         drawdown: row.drawdown,
         rsi: rsiFromCloses(synthetic, 10),
         fundamentals: { ...EMPTY_FUNDAMENTALS },
+        quoteId: row.id,
+        quoteSource: "coingecko",
+        basePrice: row.price,
+        prevClose: row.changeDay !== 0 ? row.price / (1 + row.changeDay / 100) : row.price,
+        high52: row.ath > 0 ? row.ath : row.price,
+        recentCloses: synthetic.slice(0, -1).slice(-16),
+        peerKey: "Crypto",
       },
     });
   });
@@ -392,12 +408,15 @@ export async function buildRankings(): Promise<RankingsPayload> {
   const allPe = drafts.map((d) => d.base.fundamentals.pe).filter((v): v is number => !!v && v > 0);
   const allPb = drafts.map((d) => d.base.fundamentals.pb).filter((v): v is number => !!v && v > 0);
 
+  const peerPools: Record<string, PeerPool> = {};
+
   const assets: RankedAsset[] = drafts.map((d) => {
     const peerPe = (pePools.get(d.peerKey) ?? []).length >= 3 ? pePools.get(d.peerKey)! : allPe;
     const peerPb = (pbPools.get(d.peerKey) ?? []).length >= 3 ? pbPools.get(d.peerKey)! : allPb;
     // Fallback value proxy: deeper drawdown vs. peers = cheaper.
     const ddPool = ddPools.get(d.peerKey) ?? [];
     const valueProxy = 100 - percentileRank(d.drawdownForValue, ddPool);
+    peerPools[d.peerKey] = { pe: peerPe, pb: peerPb, dd: ddPool };
 
     const valuation = valuationScore({
       pe: d.base.fundamentals.pe,
@@ -453,5 +472,6 @@ export async function buildRankings(): Promise<RankingsPayload> {
     fear,
     assets,
     degraded: [...new Set(degraded)],
+    peerPools,
   };
 }
