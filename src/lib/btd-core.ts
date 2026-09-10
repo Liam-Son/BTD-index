@@ -46,6 +46,26 @@ export interface RankedAsset {
   confidence: number;
   factors: FactorScore[];
   reasons: string[];
+  // --- live-price recomputation inputs -------------------------------------
+  /** Identifier used by the live quote feed (Yahoo symbol or CoinGecko id). */
+  quoteId: string;
+  quoteSource: "yahoo" | "coingecko";
+  /** Price used when the full snapshot was built (base for live deltas). */
+  basePrice: number;
+  /** Previous session close, used for the live intraday change. */
+  prevClose: number;
+  /** 52-week high (or all-time high for crypto) for live drawdown. */
+  high52: number;
+  /** Trailing closes excluding the latest bar, for live RSI. */
+  recentCloses: number[];
+  /** Peer-group key into `RankingsPayload.peerPools`. */
+  peerKey: string;
+}
+
+export interface PeerPool {
+  pe: number[];
+  pb: number[];
+  dd: number[];
 }
 
 export interface MarketFear {
@@ -60,6 +80,8 @@ export interface RankingsPayload {
   fear: MarketFear;
   assets: RankedAsset[];
   degraded: string[];
+  /** Peer valuation pools, keyed by `RankedAsset.peerKey`. */
+  peerPools: Record<string, PeerPool>;
 }
 
 export const WEIGHTS: Record<FactorKey, number> = {
