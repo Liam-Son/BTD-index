@@ -382,3 +382,89 @@ export function fmtCap(n: number | null) {
 export function fmtPct(n: number) {
   return `${n >= 0 ? "+" : ""}${n.toFixed(2)}%`;
 }
+
+// ---------------------------------------------------------------------------
+// Live price recomputation
+// ---------------------------------------------------------------------------
+
+/**
+ * Recompute an asset's BTD score against a live price.
+ *
+ * Only the price-sensitive factors are rebuilt: valuation (multiples scale with
+ * price, and the drawdown proxy moves with it) and momentum (RSI including the
+ * live print). Fear, quality and risk come from reported data that does not
+ * change intraday, so their snapshot components are reused unchanged. The
+ * v1.0 weighting (0.40V + 0.25M + 0.20F + 0.10Q + 0.05R) is untouched.
+ */
+export function applyLiveQuote(
+  asset: RankedAsset,
+  livePrice: number,
+  pools: Record<string, PeerPool>,
+  fearGreedLabel: string,
+): RankedAsset {
+  if (!Number.isFinite(livePrice) || livePrice <= 0 || asset.basePrice <= 0) return asset;
+
+  const ratio = livePrice / asset.basePrice;
+  const pool = pools[asset.peerKey] ?? { pe: [], pb: [], dd: [] };
+
+  const drawdown = asset.high52 > 0 ? ((livePrice - asset.high52) / asset.high52) * 100 : asset.drawdown;
+  const rsi = rsiFromCloses([...asset.recentCloses, livePrice]) ?? asset.rsi;
+  const changeDay =
+    asset.prevClose > 0 ? ((livePrice - asset.prevClose) / asset.prevClose) * 100 : asset.changeDay;
+
+  const valuation = valuationScore({
+    pe: asset.fundamentals.pe === null ? null : asset.fundamentals.pe * ratio,
+    pb: asset.fundamentals.pb === null ? null : asset.fundamentals.pb * ratio,
+    peerPe: pool.pe,
+    peerPb: pool.pb,
+    fallback: 100 - percentileRank(drawdown, pool.dd),
+  });
+  const momentum = momentumScore(rsi);
+
+  const carry = (key: FactorKey) => {
+    const f = asset.factors.find((x) => x.key === key);
+    return { value: f?.value ?? 50, detail: f?.detail ?? "", proxy: f?.proxy ?? true };
+  };
+
+  const { score, confidence, factors, reasons } = composeBtd({
+    valuation,
+    momentum,
+    fear: carry("fear"),
+    quality: carry("quality"),
+    risk: carry("risk"),
+    context: { rsi, drawdown, fearGreedLabel },
+  });
+
+  return {
+    ...asset,
+    price: livePrice,
+    changeDay,
+    drawdown,
+    rsi,
+    btdScore: score,
+    confidence,
+    factors,
+    reasons,
+  };
+}
+
+/** Apply a batch of live quotes to a full rankings payload and re-sort. */
+export function applyLiveQuotes(
+  payload: RankingsPayload,
+  quotes: Record<string, number>,
+): RankingsPayload {
+  if (!quotes || !Object.keys(quotes).length) return payload;
+  const assets = payload.assets
+    .map((a) => {
+      const q = quotes[a.quoteId];
+      return typeof q === "number" ? applyLiveQuote(a, q, payload.peerPools, payload.fear.fearGreedLabel) : a;
+    })
+    .sort((a, b) => b.btdScore - a.btdScore);
+  return { ...payload, assets };
+}
+
+/** Equal-weighted average BTD score — used for the live market pulse chart. */
+export function averageScore(assets: RankedAsset[]): number {
+  if (!assets.length) return 0;
+  return Math.round((assets.reduce((a, b) => a + b.btdScore, 0) / assets.length) * 10) / 10;
+}
