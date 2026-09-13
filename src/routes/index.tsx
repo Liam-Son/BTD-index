@@ -1,8 +1,9 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useQuery } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
-import { getRankings } from "@/lib/btd.functions";
 import { fmtPct, ratingFor, type RankedAsset } from "@/lib/btd-core";
+import { useLiveRankings, LIVE_MS } from "@/hooks/useLiveRankings";
+import { useAuth } from "@/hooks/useAuth";
+import { LivePulseChart } from "@/components/btd/LivePulseChart";
 import { FearPanel } from "@/components/btd/FearPanel";
 import { RankingsTable } from "@/components/btd/RankingsTable";
 import { RatingBadge } from "@/components/btd/RatingBadge";
@@ -33,6 +34,19 @@ export const Route = createFileRoute("/")({
 });
 
 const REFRESH_MS = 5 * 60 * 1000;
+
+/** Counts down to the next 60-second live price tick. */
+function LiveCountdown({ updatedAt }: { updatedAt: number }) {
+  const [left, setLeft] = useState(LIVE_MS);
+  useEffect(() => {
+    const target = updatedAt + LIVE_MS;
+    const tick = () => setLeft(Math.max(0, target - Date.now()));
+    tick();
+    const id = setInterval(tick, 1000);
+    return () => clearInterval(id);
+  }, [updatedAt]);
+  return <span className="tabular">{String(Math.ceil(left / 1000)).padStart(2, "0")}s</span>;
+}
 
 function Countdown({ updatedAt }: { updatedAt: string }) {
   const [left, setLeft] = useState(REFRESH_MS);
@@ -93,13 +107,27 @@ function Skeleton() {
 }
 
 function Terminal() {
-  const { data, isPending, isFetching, error, dataUpdatedAt } = useQuery({
-    queryKey: ["btd", "rankings"],
-    queryFn: () => getRankings(),
-    refetchInterval: REFRESH_MS,
-    refetchOnWindowFocus: false,
-    staleTime: REFRESH_MS,
-  });
+  const {
+    data,
+    pulse,
+    isPending,
+    error,
+    liveUpdatedAt,
+    isLive,
+    isRefreshingLive,
+  } = useLiveRankings();
+  const { user } = useAuth();
+
+  // Google sign-in returns to the site root; forward to the saved destination.
+  const navigate = Route.useNavigate();
+  useEffect(() => {
+    if (!user) return;
+    const target = sessionStorage.getItem("btd:after-auth");
+    if (target && target.startsWith("/")) {
+      sessionStorage.removeItem("btd:after-auth");
+      navigate({ to: target });
+    }
+  }, [user, navigate]);
 
   const top = data?.assets[0];
 
@@ -131,15 +159,24 @@ function Terminal() {
             >
               Crypto to buy on the dip
             </Link>
+            <Link
+              to={user ? "/portfolio" : "/auth"}
+              className="rounded-sm border border-border px-2 py-1 hover:text-foreground"
+            >
+              {user ? "My portfolio" : "Sign in"}
+            </Link>
             <span className="flex items-center gap-1.5">
               <span
-                className={`h-1.5 w-1.5 rounded-full ${isFetching ? "live-dot bg-warn" : "bg-up"}`}
+                className={`h-1.5 w-1.5 rounded-full ${isRefreshingLive ? "live-dot bg-warn" : isLive ? "bg-up" : "bg-muted-foreground"}`}
               />
-              {isFetching ? "Repricing" : "Live"}
+              {isRefreshingLive ? "Repricing" : "Live prices"}
+            </span>
+            <span>
+              Next tick <LiveCountdown updatedAt={liveUpdatedAt || Date.now()} />
             </span>
             {data && (
-              <span>
-                Next cycle <Countdown updatedAt={data.updatedAt} />
+              <span className="hidden lg:inline">
+                Full cycle <Countdown updatedAt={data.updatedAt} />
               </span>
             )}
           </div>
@@ -239,6 +276,8 @@ function Terminal() {
 
         {data && <FearPanel fear={data.fear} assetCount={data.assets.length} />}
 
+        <LivePulseChart pulse={pulse} isLive={isLive} assetCount={data?.assets.length ?? 0} />
+
         <BacktestChart />
 
         {error && (
@@ -254,7 +293,7 @@ function Terminal() {
         ) : data ? (
           <RankingsTable
             assets={data.assets}
-            updatedAt={new Date(dataUpdatedAt || Date.now()).toISOString()}
+            updatedAt={new Date(liveUpdatedAt || Date.now()).toISOString()}
           />
         ) : null}
 
