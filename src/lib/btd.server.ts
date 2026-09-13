@@ -12,6 +12,7 @@ import {
   type AssetClass,
   type Fundamentals,
   type MarketFear,
+  type PeerPool,
   type RankedAsset,
   type RankingsPayload,
 } from "./btd-core";
